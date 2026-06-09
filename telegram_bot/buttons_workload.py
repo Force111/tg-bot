@@ -16,12 +16,17 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 
 class TaskService:
-    def __init__(self, db) -> None:
+    def __init__(self, db=None) -> None:
         self.morning = Morning()
         if db is not None:
             self.morning.connect(db)
 
-        self.gpt = GeminiService()
+        self.gpt: GeminiService | None = None
+
+    def _get_gpt(self) -> GeminiService:
+        if self.gpt is None:
+            self.gpt = GeminiService()
+        return self.gpt
 
     async def get_today_task(self) -> str | None:
         day_info = self.morning.morning_script()
@@ -33,8 +38,9 @@ class TaskService:
             return None
             
 
-        prompt = self.gpt.build_prompt(day_info)
-        task_text = await self.gpt.generate_plan(prompt)
+        gpt = self._get_gpt()
+        prompt = gpt.build_prompt(day_info)
+        task_text = gpt.generate_plan(prompt)
 
         return task_text
     
@@ -61,8 +67,8 @@ class TaskService:
             
 
         return (
-            f"Progress: {current_day}/{total_days}"
-            f"Current day is: {current_day}"
+            f"Progress: {day_count}/{total_days}\n"
+            f"Current day is: {current_day_number}\n"
             f"Today's topic: {current_topic}"
         )
         
@@ -100,7 +106,5 @@ class TaskService:
         await message.send_copy(chat_id = int(ADMIN_ID))
 
         print("The message was sent succesfully")
-
-
-
+        return True
 

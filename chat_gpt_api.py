@@ -15,7 +15,7 @@ class GeminiService:
         self.client = genai.Client(api_key=api_key)
         self.model = model or os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
 
-    async def generate_plan(self, prompt: str) -> str:
+    def generate_plan(self, prompt: str) -> str:
         if not prompt or not prompt.strip():
             logging.error("No prompt line 18 chat api")
             raise ValueError("Prompt is empty")
@@ -41,7 +41,7 @@ class GeminiService:
         return [str(value)]
 
     @staticmethod
-    async def build_prompt(day_info: Mapping[str, Any]) -> str:
+    def build_prompt(day_info: Mapping[str, Any]) -> str:
         reading = day_info.get("reading") or {}
         commands = GeminiService._as_str_list(day_info.get("commands_for_day"))
         tasks = GeminiService._as_str_list(day_info.get("tasks_for_day"))

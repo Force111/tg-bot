@@ -1,3 +1,5 @@
+import logging
+
 from pymongo import ASCENDING
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -25,6 +27,7 @@ class Morning:
 
     def morning_script(self):
         print("Morning script in progress!")
+        logging.info("Morking script is go!")
         day_info = self.collection.find_one({"status": "in_progress"})
         return day_info
 
@@ -40,6 +43,7 @@ class Morning:
 
     def status_change(self, day_info):
         if day_info is None:
+            logging.error("No in progress day was found")
             return None
 
         if day_info["status"] != "in_progress":
