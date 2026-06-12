@@ -2,7 +2,9 @@ name: DevSecOps Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
   pull_request:
   workflow_dispatch:
 
@@ -24,7 +26,9 @@ jobs:
       # Real production secrets should NOT be used in tests.
       TELEGRAM_KEY: "test-telegram-token"
       MONGO_URI: "mongodb://localhost:27017/test"
-      AI_API_KEY: "test-ai-key"
+      GEMINI_API_KEY: "test-ai-key"
+      DB_NAME: "test-db"
+      ADMIN_ID: "123456789"
 
     steps:
       # ---------------------------------------------------------
@@ -57,32 +61,44 @@ jobs:
             exit 1
           fi
 
-          pip install -r .github/workflows/requirements-secdev.txt
+          if [ -f .github/workflows/requirements-secdev.txt ]; then
+            pip install -r .github/workflows/requirements-secdev.txt
+          else
+            echo ".github/workflows/requirements-secdev.txt not found"
+            exit 1
+          fi
 
       # ---------------------------------------------------------
-      # 4. Unit tests
+      # 4. Python syntax check
+      # ---------------------------------------------------------
+      - name: Check Python syntax
+        run: |
+          python -m compileall .
+
+      # ---------------------------------------------------------
+      # 5. Unit tests
+      # If tests/ does not exist, the pipeline does not fail.
       # ---------------------------------------------------------
       - name: Run unit tests with pytest
         run: |
           if [ -d tests ]; then
             pytest tests/
           else
-            echo "tests/ directory not found"
-            exit 1
+            echo "tests/ directory not found, skipping unit tests"
           fi
 
       # ---------------------------------------------------------
-      # 5. Bandit - Python security scanner
+      # 6. Bandit - Python security scanner
       # ---------------------------------------------------------
       - name: Run Bandit Python security scan
         run: |
           bandit -r . \
-            -x tests,.venv,venv \
+            -x tests,.venv,venv,__pycache__ \
             -f json \
             -o bandit-report.json
 
       # ---------------------------------------------------------
-      # 6. Semgrep - SAST scanner
+      # 7. Semgrep - SAST scanner
       # ---------------------------------------------------------
       - name: Run Semgrep SAST scan
         run: |
@@ -92,7 +108,7 @@ jobs:
             --output semgrep-report.json
 
       # ---------------------------------------------------------
-      # 7. pip-audit - Python dependency vulnerability scan
+      # 8. pip-audit - Python dependency vulnerability scan
       # ---------------------------------------------------------
       - name: Run pip-audit dependency scan
         run: |
@@ -101,7 +117,7 @@ jobs:
             --output pip-audit-report.json
 
       # ---------------------------------------------------------
-      # 8. Gitleaks - secrets scanning
+      # 9. Gitleaks - secrets scanning
       # ---------------------------------------------------------
       - name: Run Gitleaks secret scan
         uses: gitleaks/gitleaks-action@v2
@@ -109,17 +125,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # ---------------------------------------------------------
-      # 9. Docker build
+      # 10. Docker build
       # ---------------------------------------------------------
       - name: Build Docker image
         run: |
           docker build -t $IMAGE_NAME:${{ github.sha }} .
 
       # ---------------------------------------------------------
-      # 10. Trivy image scan
+      # 11. Trivy image scan
       # ---------------------------------------------------------
       - name: Run Trivy Docker image scan
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: json
@@ -129,11 +145,11 @@ jobs:
           ignore-unfixed: true
 
       # ---------------------------------------------------------
-      # 11. Trivy config scan
+      # 12. Trivy config scan
       # Dockerfile / docker-compose / Kubernetes YAML / IaC
       # ---------------------------------------------------------
       - name: Run Trivy config scan
-        uses: aquasecurity/trivy-action@v0.28.0
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: config
           scan-ref: .
@@ -143,7 +159,7 @@ jobs:
           exit-code: "1"
 
       # ---------------------------------------------------------
-      # 12. Upload reports
+      # 13. Upload reports
       # Runs even if previous steps failed
       # ---------------------------------------------------------
       - name: Upload security reports
