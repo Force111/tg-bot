@@ -24,10 +24,6 @@ async def command_start_handler(message: Message) -> None:
         reply_markup=get_main_menu(),
     )
 
-@router.message() 
-async def echo_handler(message: Message) -> None:
-    await message.send_copy(chat_id=message.chat.id)
-    await message.answer("Do not spam!")
 
 
 

@@ -1,0 +1,14 @@
+.env
+.git
+.gitignore
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+
+.venv/
+venv/
+env/
+
+GitHub_pipeline/
+python-telegram-bot/
