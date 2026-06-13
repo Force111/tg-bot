@@ -4,3 +4,4 @@ MONGO_URI = "mongodb+srv://test_user:test_password@test-cluster.mongodb.net/test
 GEMINI_API_KEY = "AIzaSyFAKE_TEST_KEY_DO_NOT_USE_1234567890"
 AWS_ACCESS_KEY_ID = "AKIAIOSFODNN7EXAMPLE"
 AWS_SECRET_ACCESS_KEY = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+GITHUB_TOKEN = "ghp_1234567890abcdefghijklmnopqrstuvwxyzABCDE"

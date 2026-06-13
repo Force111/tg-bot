@@ -117,19 +117,17 @@ jobs:
       # ---------------------------------------------------------
       # 9. Gitleaks - secrets scanning
       # ---------------------------------------------------------
-            # ---------------------------------------------------------
-      # 9. Gitleaks - secrets scanning
-      # ---------------------------------------------------------
-      - name: Run Gitleaks secret scan
+      - name: Run Gitleaks scan
         run: |
           docker run --rm \
-            -v "$PWD:/repo" \
+            -v "${{ github.workspace }}:/repo" \
             zricethezav/gitleaks:latest \
             detect \
-            --source /repo \
+            --source=/repo \
             --no-git \
             --redact \
-            --exit-code 1
+            --exit-code=1 \
+            --verbose
 
       # ---------------------------------------------------------
       # 10. Docker build
