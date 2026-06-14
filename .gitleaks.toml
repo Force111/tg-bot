@@ -1,0 +1,16 @@
+title = "Custom Gitleaks Rules for Telegram Bot"
+
+[[rules]]
+id = "telegram-bot-project-secrets"
+description = "Detect project-specific secrets used by Telegram bot"
+regex = '''(?i)(TELEGRAM_KEY|MONGO_URI|GEMINI_API_KEY|DB_NAME|ADMIN_ID|API_KEY|PASSWORD|SECRET)\s*=\s*["'][^"']{8,}["']'''
+keywords = [
+  "TELEGRAM_KEY",
+  "MONGO_URI",
+  "GEMINI_API_KEY",
+  "DB_NAME",
+  "ADMIN_ID",
+  "API_KEY",
+  "PASSWORD",
+  "SECRET"
+]
